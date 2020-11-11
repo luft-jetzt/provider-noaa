@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\ApiPusher\ApiPusherInterface;
 use App\SourceFetcher\SourceFetcherInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,10 +14,12 @@ class NoaaFetchCommand extends Command
     protected static $defaultName = 'luft:fetch';
 
     protected SourceFetcherInterface $sourceFetcher;
+    protected ApiPusherInterface $apiPusher;
 
-    public function __construct(string $name = null, SourceFetcherInterface $sourceFetcher)
+    public function __construct(string $name = null, SourceFetcherInterface $sourceFetcher, ApiPusherInterface $apiPusher)
     {
         $this->sourceFetcher = $sourceFetcher;
+        $this->apiPusher = $apiPusher;
 
         parent::__construct($name);
     }
@@ -34,7 +37,8 @@ class NoaaFetchCommand extends Command
 
         $value = $this->sourceFetcher->fetch();
 
-        dd($value);
+        $this->apiPusher->pushValue($value);
+
         return Command::SUCCESS;
     }
 }
