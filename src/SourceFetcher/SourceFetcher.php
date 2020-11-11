@@ -1,27 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace App\Provider\NoaaProvider\SourceFetcher;
+namespace App\SourceFetcher;
 
-use App\Air\Measurement\CO2;
-use App\Pollution\Value\Value;
-use App\Producer\Value\ValueProducerInterface;
-use App\SourceFetcher\FetchProcess;
-use App\SourceFetcher\FetchResult;
-use App\SourceFetcher\SourceFetcherInterface;
-use Curl\Curl;
+use App\Model\Value;
 
 class SourceFetcher implements SourceFetcherInterface
 {
-    protected ValueProducerInterface $valueProducer;
-
-    public function __construct(ValueProducerInterface $valueProducer)
-    {
-        $this->valueProducer = $valueProducer;
-
-        $this->curl = new Curl();
-    }
-
-    public function fetch(FetchProcess $fetchProcess): FetchResult
+    public function fetch(): ?Value
     {
         $xmlFile = file_get_contents('https://www.esrl.noaa.gov/gmd/webdata/ccgg/trends/rss.xml');
 
@@ -32,22 +17,17 @@ class SourceFetcher implements SourceFetcherInterface
         $lastValueDateTimeString = array_key_last($resultList);
         $lastCo2Value = (float) $resultList[$lastValueDateTimeString];
 
-        $value = $this->createValue($lastCo2Value, new \DateTimeImmutable($lastValueDateTimeString));
+        $value = $this->createValue($lastCo2Value, new \DateTime($lastValueDateTimeString));
 
-        $this->valueProducer->publish($value);
-
-        $fetchResult = new FetchResult();
-        $fetchResult->setCounter('co2', 1);
-
-        return $fetchResult;
+        return $value;
     }
 
-    protected function createValue(float $lastCo2Value, \DateTimeImmutable $dateTime): Value
+    protected function createValue(float $lastCo2Value, \DateTime $dateTime): Value
     {
         $value = new Value();
         $value->setValue($lastCo2Value)
             ->setStation('USHIMALO')
-            ->setPollutant(CO2::MEASUREMENT_CO2)
+            ->setPollutant(7) // 7 is co2
             ->setDateTime($dateTime);
 
         return $value;
