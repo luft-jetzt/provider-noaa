@@ -3,12 +3,15 @@
 namespace App\SourceFetcher;
 
 use App\Model\Value;
+use GuzzleHttp\Client;
 
 class SourceFetcher implements SourceFetcherInterface
 {
+    const DATA_URI = 'https://www.esrl.noaa.gov/gmd/webdata/ccgg/trends/rss.xml';
+
     public function fetch(): ?Value
     {
-        $xmlFile = file_get_contents('https://www.esrl.noaa.gov/gmd/webdata/ccgg/trends/rss.xml');
+        $xmlFile = $this->loadXmlFileContent();
 
         $simpleXml = new \SimpleXMLElement($xmlFile);
 
@@ -64,5 +67,13 @@ class SourceFetcher implements SourceFetcherInterface
         preg_match('/\d{3,3}\.\d{1,2}/', $description, $matches);
 
         return (float) array_pop($matches);
+    }
+
+    protected function loadXmlFileContent(): string
+    {
+        $client = new Client();
+        $response = $client->get(self::DATA_URI);
+
+        return $response->getBody()->getContents();
     }
 }
