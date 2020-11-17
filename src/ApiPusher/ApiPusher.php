@@ -16,7 +16,8 @@ class ApiPusher implements ApiPusherInterface
         $this->serializer = $serializer;
 
         $this->client = new Client([
-            'base_uri' => 'https://luft.jetzt/'
+            'base_uri' => 'https://localhost:8000/',
+            'verify' => false,
         ]);
     }
 
