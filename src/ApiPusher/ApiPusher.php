@@ -16,14 +16,14 @@ class ApiPusher implements ApiPusherInterface
         $this->serializer = $serializer;
 
         $this->client = new Client([
-            'base_uri' => 'https://localhost:8000/',
+            'base_uri' => 'https://127.0.0.1:8000/',
             'verify' => false,
         ]);
     }
 
     public function pushValue(Value $value): void
     {
-        $this->client->put('/api/data', [
+        $this->client->put('/api/value', [
             'body' => $this->serializer->serialize($value, 'json'),
         ]);
     }
