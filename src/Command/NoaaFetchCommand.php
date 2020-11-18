@@ -39,6 +39,8 @@ class NoaaFetchCommand extends Command
 
         $this->apiPusher->pushValue($value);
 
+        $io->success(sprintf('Pushed value %f to luft api', $value->getValue()));
+
         return Command::SUCCESS;
     }
 }
