@@ -30,7 +30,7 @@ class SourceFetcher implements SourceFetcherInterface
         $value = new Value();
         $value->setValue($lastCo2Value)
             ->setStationCode('USHIMALO')
-            ->setPollutant(7) // 7 is co2
+            ->setPollutant('co2')
             ->setDateTime($dateTime);
 
         return $value;
