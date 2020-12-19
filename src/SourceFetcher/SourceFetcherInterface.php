@@ -2,7 +2,7 @@
 
 namespace App\SourceFetcher;
 
-use App\Model\Value;
+use Caldera\LuftApiBundle\Model\Value;
 
 interface SourceFetcherInterface
 {
