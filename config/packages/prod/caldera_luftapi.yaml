@@ -1,0 +1,5 @@
+caldera_luftapi:
+    api:
+        hostname: luft.jetzt
+        port: 443
+        verify: true
