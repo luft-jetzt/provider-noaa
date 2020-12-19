@@ -5,14 +5,15 @@
     "php": ">=7.4",
     "ext-ctype": "*",
     "ext-iconv": "*",
+    "ext-simplexml": "*",
     "guzzlehttp/guzzle": "^7.0",
     "jms/serializer-bundle": "^3.7",
+    "luft-jetzt/luft-api-bundle": "dev-main",
     "symfony/console": "5.1.*",
     "symfony/dotenv": "5.1.*",
     "symfony/flex": "^1.3.1",
     "symfony/framework-bundle": "5.1.*",
-    "symfony/yaml": "5.1.*",
-    "ext-simplexml": "*"
+    "symfony/yaml": "5.1.*"
   },
   "require-dev": {
     "symfony/maker-bundle": "^1.23"
@@ -43,6 +44,7 @@
     "symfony/polyfill-php70": "*",
     "symfony/polyfill-php56": "*"
   },
+  "minimum-stability": "alpha",
   "scripts": {
     "auto-scripts": {
       "cache:clear": "symfony-cmd",

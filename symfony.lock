@@ -49,6 +49,9 @@
             "config/packages/prod/jms_serializer.yaml"
         ]
     },
+    "luft-jetzt/luft-api-bundle": {
+        "version": "dev-main"
+    },
     "nikic/php-parser": {
         "version": "v4.10.2"
     },
