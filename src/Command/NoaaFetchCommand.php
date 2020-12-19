@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use App\ApiPusher\ApiPusherInterface;
 use App\SourceFetcher\SourceFetcherInterface;
+use Caldera\LuftApiBundle\Api\ValueApiInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,12 +14,12 @@ class NoaaFetchCommand extends Command
     protected static $defaultName = 'luft:fetch';
 
     protected SourceFetcherInterface $sourceFetcher;
-    protected ApiPusherInterface $apiPusher;
+    protected ValueApiInterface $valueApi;
 
-    public function __construct(string $name = null, SourceFetcherInterface $sourceFetcher, ApiPusherInterface $apiPusher)
+    public function __construct(string $name = null, SourceFetcherInterface $sourceFetcher, ValueApiInterface $valueApi)
     {
         $this->sourceFetcher = $sourceFetcher;
-        $this->apiPusher = $apiPusher;
+        $this->valueApi = $valueApi;
 
         parent::__construct($name);
     }
@@ -37,7 +37,7 @@ class NoaaFetchCommand extends Command
 
         $value = $this->sourceFetcher->fetch();
 
-        $this->apiPusher->pushValue($value);
+        $this->valueApi->putValue($value);
 
         $io->success(sprintf('Pushed value %f to luft api', $value->getValue()));
 
