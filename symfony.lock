@@ -141,19 +141,18 @@
         ]
     },
     "symfony/framework-bundle": {
-        "version": "5.1",
+        "version": "6.0",
         "recipe": {
             "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "5.1",
-            "ref": "5f0d0fd82ffa3580fe0ce8e3b2d18506ebf37a0e"
+            "branch": "main",
+            "version": "5.4",
+            "ref": "3cd216a4d007b78d8554d44a5b1c0a446dab24fb"
         },
         "files": [
             "config/packages/cache.yaml",
             "config/packages/framework.yaml",
-            "config/packages/test/framework.yaml",
             "config/preload.php",
-            "config/routes/dev/framework.yaml",
+            "config/routes/framework.yaml",
             "config/services.yaml",
             "public/index.php",
             "src/Controller/.gitignore",
@@ -188,15 +187,14 @@
         "version": "v1.25.0"
     },
     "symfony/routing": {
-        "version": "5.1",
+        "version": "6.0",
         "recipe": {
             "repo": "github.com/symfony/recipes",
-            "branch": "master",
-            "version": "5.1",
-            "ref": "b4f3e7c95e38b606eef467e8a42a8408fc460c43"
+            "branch": "main",
+            "version": "6.0",
+            "ref": "eb3b377a4dc07006c4bdb2c773652cc9434f5246"
         },
         "files": [
-            "config/packages/prod/routing.yaml",
             "config/packages/routing.yaml",
             "config/routes.yaml"
         ]
