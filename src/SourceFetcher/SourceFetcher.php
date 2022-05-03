@@ -1,29 +1,17 @@
 <?php declare(strict_types=1);
 
-namespace App\Provider\NoaaProvider\SourceFetcher;
+namespace App\SourceFetcher;
 
-use App\Air\Measurement\CO2;
-use App\Pollution\Value\Value;
-use App\Producer\Value\ValueProducerInterface;
-use App\SourceFetcher\FetchProcess;
-use App\SourceFetcher\FetchResult;
-use App\SourceFetcher\SourceFetcherInterface;
-use Curl\Curl;
+use Caldera\LuftApiBundle\Model\Value;
+use GuzzleHttp\Client;
 
 class SourceFetcher implements SourceFetcherInterface
 {
-    protected ValueProducerInterface $valueProducer;
+    const DATA_URI = 'https://www.esrl.noaa.gov/gmd/webdata/ccgg/trends/rss.xml';
 
-    public function __construct(ValueProducerInterface $valueProducer)
+    public function fetch(): ?Value
     {
-        $this->valueProducer = $valueProducer;
-
-        $this->curl = new Curl();
-    }
-
-    public function fetch(FetchProcess $fetchProcess): FetchResult
-    {
-        $xmlFile = file_get_contents('https://www.esrl.noaa.gov/gmd/webdata/ccgg/trends/rss.xml');
+        $xmlFile = $this->loadXmlFileContent();
 
         $simpleXml = new \SimpleXMLElement($xmlFile);
 
@@ -32,22 +20,17 @@ class SourceFetcher implements SourceFetcherInterface
         $lastValueDateTimeString = array_key_last($resultList);
         $lastCo2Value = (float) $resultList[$lastValueDateTimeString];
 
-        $value = $this->createValue($lastCo2Value, new \DateTimeImmutable($lastValueDateTimeString));
+        $value = $this->createValue($lastCo2Value, new \DateTime($lastValueDateTimeString));
 
-        $this->valueProducer->publish($value);
-
-        $fetchResult = new FetchResult();
-        $fetchResult->setCounter('co2', 1);
-
-        return $fetchResult;
+        return $value;
     }
 
-    protected function createValue(float $lastCo2Value, \DateTimeImmutable $dateTime): Value
+    protected function createValue(float $lastCo2Value, \DateTime $dateTime): Value
     {
         $value = new Value();
         $value->setValue($lastCo2Value)
-            ->setStation('USHIMALO')
-            ->setPollutant(CO2::MEASUREMENT_CO2)
+            ->setStationCode('USHIMALO')
+            ->setPollutant('co2')
             ->setDateTime($dateTime);
 
         return $value;
@@ -84,5 +67,13 @@ class SourceFetcher implements SourceFetcherInterface
         preg_match('/\d{3,3}\.\d{1,2}/', $description, $matches);
 
         return (float) array_pop($matches);
+    }
+
+    protected function loadXmlFileContent(): string
+    {
+        $client = new Client();
+        $response = $client->get(self::DATA_URI);
+
+        return $response->getBody()->getContents();
     }
 }
