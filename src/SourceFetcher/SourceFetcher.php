@@ -2,7 +2,7 @@
 
 namespace App\SourceFetcher;
 
-use Caldera\LuftApiBundle\Model\Value;
+use Caldera\LuftModel\Model\Value;
 use GuzzleHttp\Client;
 
 class SourceFetcher implements SourceFetcherInterface
