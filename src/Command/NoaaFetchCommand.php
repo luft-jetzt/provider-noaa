@@ -4,31 +4,18 @@ namespace App\Command;
 
 use App\SourceFetcher\SourceFetcherInterface;
 use Caldera\LuftApiBundle\Api\ValueApiInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(name: 'luft:fetch', description: 'Push noaa data to luft')]
 class NoaaFetchCommand extends Command
 {
-    protected static $defaultName = 'luft:fetch';
-
-    protected SourceFetcherInterface $sourceFetcher;
-    protected ValueApiInterface $valueApi;
-
-    public function __construct(SourceFetcherInterface $sourceFetcher, ValueApiInterface $valueApi)
+    public function __construct(protected SourceFetcherInterface $sourceFetcher, protected ValueApiInterface $valueApi)
     {
-        $this->sourceFetcher = $sourceFetcher;
-        $this->valueApi = $valueApi;
-
         parent::__construct();
-    }
-
-    protected function configure(): void
-    {
-        $this
-            ->setDescription('Add a short description for your command')
-        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
