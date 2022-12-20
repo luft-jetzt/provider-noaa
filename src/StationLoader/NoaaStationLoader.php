@@ -4,7 +4,6 @@ namespace App\Provider\NoaaProvider\StationLoader;
 
 use App\Entity\Station;
 use App\Provider\AbstractStationLoader;
-use App\Provider\NoaaProvider\NoaaProvider;
 use App\Provider\StationLoaderInterface;
 use Doctrine\ORM\EntityManager;
 
