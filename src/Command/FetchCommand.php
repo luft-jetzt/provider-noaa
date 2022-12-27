@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(name: 'luft:fetch', description: 'Push noaa data to luft')]
-class NoaaFetchCommand extends Command
+class FetchCommand extends Command
 {
     public function __construct(protected SourceFetcherInterface $sourceFetcher, protected ValueApiInterface $valueApi)
     {
