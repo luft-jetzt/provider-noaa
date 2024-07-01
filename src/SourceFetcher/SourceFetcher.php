@@ -11,7 +11,7 @@ class SourceFetcher implements SourceFetcherInterface
 
     public function fetch(): ?Value
     {
-        $xmlFile = $this->loadXmlFileContent();
+        $xmlFile = file_get_contents(self::DATA_URI);
 
         $simpleXml = new \SimpleXMLElement($xmlFile);
 
@@ -67,13 +67,5 @@ class SourceFetcher implements SourceFetcherInterface
         preg_match('/\d{3,3}\.\d{1,2}/', $description, $matches);
 
         return (float) array_pop($matches);
-    }
-
-    protected function loadXmlFileContent(): string
-    {
-        $client = new Client();
-        $response = $client->get(self::DATA_URI);
-
-        return $response->getBody()->getContents();
     }
 }
