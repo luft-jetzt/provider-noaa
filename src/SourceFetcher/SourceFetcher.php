@@ -7,7 +7,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SourceFetcher implements SourceFetcherInterface
 {
-    const DATA_URI = 'https://www.esrl.noaa.gov/gmd/webdata/ccgg/trends/rss.xml';
+    private const string DATA_URI = 'https://www.esrl.noaa.gov/gmd/webdata/ccgg/trends/rss.xml';
+    private const string STATION_CODE = 'USHIMALO';
+    private const string POLLUTANT = 'co2';
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -22,26 +24,28 @@ class SourceFetcher implements SourceFetcherInterface
 
         $resultList = $this->parseXmlFile($simpleXml);
 
+        if ($resultList === []) {
+            return null;
+        }
+
         $lastValueDateTimeString = array_key_last($resultList);
-        $lastCo2Value = (float) $resultList[$lastValueDateTimeString];
+        $lastCo2Value = $resultList[$lastValueDateTimeString];
 
-        $value = $this->createValue($lastCo2Value, new \DateTime($lastValueDateTimeString));
-
-        return $value;
+        return $this->createValue($lastCo2Value, new \DateTimeImmutable($lastValueDateTimeString));
     }
 
-    protected function createValue(float $lastCo2Value, \DateTime $dateTime): Value
+    private function createValue(float $co2Value, \DateTimeImmutable $dateTime): Value
     {
         $value = new Value();
-        $value->setValue($lastCo2Value)
-            ->setStationCode('USHIMALO')
-            ->setPollutant('co2')
+        $value->setValue($co2Value)
+            ->setStationCode(self::STATION_CODE)
+            ->setPollutant(self::POLLUTANT)
             ->setDateTime($dateTime);
 
         return $value;
     }
 
-    protected function parseXmlFile(\SimpleXMLElement $xmlRoot): array
+    private function parseXmlFile(\SimpleXMLElement $xmlRoot): array
     {
         $resultList = [];
 
@@ -54,7 +58,9 @@ class SourceFetcher implements SourceFetcherInterface
 
             $co2Value = $this->fetchCo2ValueFromString((string) $item->description);
 
-            $resultList[$guid] = $co2Value;
+            if ($co2Value !== null) {
+                $resultList[$guid] = $co2Value;
+            }
         }
 
         uksort($resultList, 'strnatcmp');
@@ -62,15 +68,17 @@ class SourceFetcher implements SourceFetcherInterface
         return $resultList;
     }
 
-    protected function isYearMonthDayGuidString(string $guid): bool
+    private function isYearMonthDayGuidString(string $guid): bool
     {
         return 1 === preg_match('/^\d{4}-\d{1,2}-\d{1,2}$/', $guid);
     }
 
-    protected function fetchCo2ValueFromString(string $description): float
+    private function fetchCo2ValueFromString(string $description): ?float
     {
-        preg_match('/\d{3,3}\.\d{1,2}/', $description, $matches);
+        if (preg_match('/\d{3,}\.\d{1,2}/', $description, $matches)) {
+            return (float) $matches[0];
+        }
 
-        return (float) array_pop($matches);
+        return null;
     }
 }
