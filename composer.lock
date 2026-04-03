@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "luft-jetzt/luft-api-bundle",
-            "version": "1.1.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/luft-jetzt/luft-api-bundle.git",
-                "reference": "da9b40f9b7be7b1bfd43e6ddbe6fbea2fc2507b3"
+                "reference": "6162e46287143d461e6453a24bdcf1e9ffb24382"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/luft-jetzt/luft-api-bundle/zipball/da9b40f9b7be7b1bfd43e6ddbe6fbea2fc2507b3",
-                "reference": "da9b40f9b7be7b1bfd43e6ddbe6fbea2fc2507b3",
+                "url": "https://api.github.com/repos/luft-jetzt/luft-api-bundle/zipball/6162e46287143d461e6453a24bdcf1e9ffb24382",
+                "reference": "6162e46287143d461e6453a24bdcf1e9ffb24382",
                 "shasum": ""
             },
             "require": {
@@ -43,9 +43,9 @@
             ],
             "support": {
                 "issues": "https://github.com/luft-jetzt/luft-api-bundle/issues",
-                "source": "https://github.com/luft-jetzt/luft-api-bundle/tree/1.1.0"
+                "source": "https://github.com/luft-jetzt/luft-api-bundle/tree/1.1.1"
             },
-            "time": "2026-04-03T18:16:15+00:00"
+            "time": "2026-04-03T20:14:54+00:00"
         },
         {
             "name": "luft-jetzt/luft-model",
