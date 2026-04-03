@@ -3,15 +3,20 @@
 namespace App\SourceFetcher;
 
 use Caldera\LuftModel\Model\Value;
-use GuzzleHttp\Client;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SourceFetcher implements SourceFetcherInterface
 {
     const DATA_URI = 'https://www.esrl.noaa.gov/gmd/webdata/ccgg/trends/rss.xml';
 
+    public function __construct(
+        private readonly HttpClientInterface $httpClient,
+    ) {}
+
     public function fetch(): ?Value
     {
-        $xmlFile = file_get_contents(self::DATA_URI);
+        $response = $this->httpClient->request('GET', self::DATA_URI);
+        $xmlFile = $response->getContent();
 
         $simpleXml = new \SimpleXMLElement($xmlFile);
 
