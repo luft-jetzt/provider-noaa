@@ -13,8 +13,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'luft:fetch', description: 'Push noaa data to luft')]
 class NoaaFetchCommand extends Command
 {
-    public function __construct(protected SourceFetcherInterface $sourceFetcher, protected ValueApiInterface $valueApi)
-    {
+    public function __construct(
+        private readonly SourceFetcherInterface $sourceFetcher,
+        private readonly ValueApiInterface $valueApi,
+    ) {
         parent::__construct();
     }
 
@@ -23,6 +25,11 @@ class NoaaFetchCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $value = $this->sourceFetcher->fetch();
+
+        if ($value === null) {
+            $io->error('Could not fetch CO2 data from NOAA');
+            return Command::FAILURE;
+        }
 
         $this->valueApi->putValue($value);
 
