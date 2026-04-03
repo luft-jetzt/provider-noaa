@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\SourceFetcher;
 
@@ -13,7 +15,8 @@ class SourceFetcher implements SourceFetcherInterface
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
-    ) {}
+    ) {
+    }
 
     public function fetch(): ?Value
     {
@@ -24,17 +27,17 @@ class SourceFetcher implements SourceFetcherInterface
 
         $resultList = $this->parseXmlFile($simpleXml);
 
-        if ($resultList === []) {
+        if ([] === $resultList) {
             return null;
         }
 
         $lastValueDateTimeString = array_key_last($resultList);
         $lastCo2Value = $resultList[$lastValueDateTimeString];
 
-        return $this->createValue($lastCo2Value, new \DateTimeImmutable($lastValueDateTimeString));
+        return $this->createValue($lastCo2Value, new \DateTime($lastValueDateTimeString));
     }
 
-    private function createValue(float $co2Value, \DateTimeImmutable $dateTime): Value
+    private function createValue(float $co2Value, \DateTime $dateTime): Value
     {
         $value = new Value();
         $value->setValue($co2Value)
@@ -45,6 +48,7 @@ class SourceFetcher implements SourceFetcherInterface
         return $value;
     }
 
+    /** @return array<string, float> */
     private function parseXmlFile(\SimpleXMLElement $xmlRoot): array
     {
         $resultList = [];
@@ -58,7 +62,7 @@ class SourceFetcher implements SourceFetcherInterface
 
             $co2Value = $this->fetchCo2ValueFromString((string) $item->description);
 
-            if ($co2Value !== null) {
+            if (null !== $co2Value) {
                 $resultList[$guid] = $co2Value;
             }
         }

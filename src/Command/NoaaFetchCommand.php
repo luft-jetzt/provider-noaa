@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace App\Command;
 
@@ -26,8 +28,9 @@ class NoaaFetchCommand extends Command
 
         $value = $this->sourceFetcher->fetch();
 
-        if ($value === null) {
+        if (null === $value) {
             $io->error('Could not fetch CO2 data from NOAA');
+
             return Command::FAILURE;
         }
 
