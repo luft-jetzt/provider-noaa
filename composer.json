@@ -36,7 +36,6 @@
     }
   },
   "replace": {
-    "paragonie/random_compat": "2.*",
     "symfony/polyfill-ctype": "*",
     "symfony/polyfill-iconv": "*",
     "symfony/polyfill-php72": "*",
@@ -50,8 +49,7 @@
   },
   "scripts": {
     "auto-scripts": {
-      "cache:clear": "symfony-cmd",
-      "assets:install %PUBLIC_DIR%": "symfony-cmd"
+      "cache:clear": "symfony-cmd"
     },
     "post-install-cmd": [
       "@auto-scripts"
