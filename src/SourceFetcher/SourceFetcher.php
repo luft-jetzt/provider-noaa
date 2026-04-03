@@ -7,7 +7,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class SourceFetcher implements SourceFetcherInterface
 {
-    private const string DATA_URI = 'https://www.esrl.noaa.gov/gmd/webdata/ccgg/trends/rss.xml';
+    private const string DATA_URI = 'https://gml.noaa.gov/webdata/ccgg/trends/rss.xml';
     private const string STATION_CODE = 'USHIMALO';
     private const string POLLUTANT = 'co2';
 
