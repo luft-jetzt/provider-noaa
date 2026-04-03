@@ -7,6 +7,7 @@ namespace App\Tests\SourceFetcher;
 use App\SourceFetcher\SourceFetcher;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\HttpClient\Exception\ServerException;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -156,6 +157,154 @@ XML;
 
         self::assertNotNull($value);
         self::assertSame(1050.25, $value->getValue());
+    }
+
+    public function testFetchReturnsNullWhenAllItemsHaveUnparseableCo2Values(): void
+    {
+        $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <guid>2024-3-15</guid>
+      <description>No value here</description>
+    </item>
+    <item>
+      <guid>2024-3-16</guid>
+      <description>Also no value</description>
+    </item>
+  </channel>
+</rss>
+XML;
+
+        $fetcher = $this->createFetcher($xml);
+        self::assertNull($fetcher->fetch());
+    }
+
+    public function testFetchWithSingleItem(): void
+    {
+        $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <guid>2024-7-4</guid>
+      <description>CO2: 419.80 ppm</description>
+    </item>
+  </channel>
+</rss>
+XML;
+
+        $fetcher = $this->createFetcher($xml);
+        $value = $fetcher->fetch();
+
+        self::assertNotNull($value);
+        self::assertSame(419.80, $value->getValue());
+        self::assertSame('2024-07-04', $value->getDateTime()->format('Y-m-d'));
+    }
+
+    public function testFetchExtractsCo2WithSingleDecimalDigit(): void
+    {
+        $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <guid>2024-3-15</guid>
+      <description>CO2: 421.3 ppm</description>
+    </item>
+  </channel>
+</rss>
+XML;
+
+        $fetcher = $this->createFetcher($xml);
+        $value = $fetcher->fetch();
+
+        self::assertNotNull($value);
+        self::assertSame(421.3, $value->getValue());
+    }
+
+    public function testFetchExtractsFirstCo2ValueFromMultipleNumbers(): void
+    {
+        $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <guid>2024-3-15</guid>
+      <description>Previous: 419.50 ppm, Current: 421.37 ppm</description>
+    </item>
+  </channel>
+</rss>
+XML;
+
+        $fetcher = $this->createFetcher($xml);
+        $value = $fetcher->fetch();
+
+        self::assertNotNull($value);
+        self::assertSame(419.50, $value->getValue());
+    }
+
+    public function testFetchRequestsCorrectUrl(): void
+    {
+        $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <guid>2024-3-15</guid>
+      <description>CO2: 421.37 ppm</description>
+    </item>
+  </channel>
+</rss>
+XML;
+
+        $response = new MockResponse($xml);
+        $httpClient = new MockHttpClient($response);
+
+        $fetcher = new SourceFetcher($httpClient);
+        $fetcher->fetch();
+
+        self::assertSame('GET', $response->getRequestMethod());
+        self::assertSame('https://gml.noaa.gov/webdata/ccgg/trends/rss.xml', $response->getRequestUrl());
+    }
+
+    public function testFetchThrowsOnHttpError(): void
+    {
+        $response = new MockResponse('', ['http_code' => 500]);
+        $httpClient = new MockHttpClient($response);
+
+        $fetcher = new SourceFetcher($httpClient);
+
+        $this->expectException(ServerException::class);
+        $fetcher->fetch();
+    }
+
+    #[\PHPUnit\Framework\Attributes\WithoutErrorHandler]
+    public function testFetchThrowsOnInvalidXml(): void
+    {
+        $fetcher = $this->createFetcher('this is not xml');
+
+        $this->expectException(\Exception::class);
+        $fetcher->fetch();
+    }
+
+    public function testFetchIgnoresItemsWithEmptyGuid(): void
+    {
+        $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <guid></guid>
+      <description>CO2: 421.37 ppm</description>
+    </item>
+  </channel>
+</rss>
+XML;
+
+        $fetcher = $this->createFetcher($xml);
+        self::assertNull($fetcher->fetch());
     }
 
     #[DataProvider('validGuidProvider')]
