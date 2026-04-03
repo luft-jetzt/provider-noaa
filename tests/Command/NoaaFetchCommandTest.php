@@ -61,6 +61,50 @@ class NoaaFetchCommandTest extends TestCase
         self::assertSame('luft:fetch', $command->getName());
     }
 
+    public function testCommandDescription(): void
+    {
+        $sourceFetcher = $this->createStub(SourceFetcherInterface::class);
+        $valueApi = $this->createStub(ValueApiInterface::class);
+
+        $command = new NoaaFetchCommand($sourceFetcher, $valueApi);
+
+        self::assertSame('Push noaa data to luft', $command->getDescription());
+    }
+
+    public function testSourceFetcherExceptionPropagates(): void
+    {
+        $sourceFetcher = $this->createStub(SourceFetcherInterface::class);
+        $sourceFetcher->method('fetch')->willThrowException(new \RuntimeException('Connection failed'));
+
+        $valueApi = $this->createStub(ValueApiInterface::class);
+
+        $tester = $this->createCommandTester($sourceFetcher, $valueApi);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Connection failed');
+        $tester->execute([]);
+    }
+
+    public function testSuccessOutputContainsPushedMessage(): void
+    {
+        $value = new Value();
+        $value->setValue(425.00)
+            ->setStationCode('USHIMALO')
+            ->setPollutant('co2')
+            ->setDateTime(new \DateTime('2024-06-01'));
+
+        $sourceFetcher = $this->createStub(SourceFetcherInterface::class);
+        $sourceFetcher->method('fetch')->willReturn($value);
+
+        $valueApi = $this->createStub(ValueApiInterface::class);
+
+        $tester = $this->createCommandTester($sourceFetcher, $valueApi);
+        $tester->execute([]);
+
+        self::assertStringContainsString('Pushed value', $tester->getDisplay());
+        self::assertStringContainsString('luft api', $tester->getDisplay());
+    }
+
     private function createCommandTester(SourceFetcherInterface $sourceFetcher, ValueApiInterface $valueApi): CommandTester
     {
         $command = new NoaaFetchCommand($sourceFetcher, $valueApi);
