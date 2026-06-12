@@ -1,6 +1,10 @@
 framework:
     secret: '%env(APP_SECRET)%'
     http_method_override: false
+    http_client:
+        default_options:
+            timeout: 10
+            max_duration: 30
     php_errors:
         log: true
 
