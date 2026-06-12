@@ -23,7 +23,13 @@ class SourceFetcher implements SourceFetcherInterface
         $response = $this->httpClient->request('GET', self::DATA_URI);
         $xmlFile = $response->getContent();
 
-        $simpleXml = new \SimpleXMLElement($xmlFile);
+        if ('' === trim($xmlFile)) {
+            return null;
+        }
+
+        // LIBXML_NONET verhindert das Laden externer Entities/DTDs über das Netz
+        // (defensive Härtung gegen XXE, unabhängig von libxml-Defaults).
+        $simpleXml = new \SimpleXMLElement($xmlFile, LIBXML_NONET);
 
         $resultList = $this->parseXmlFile($simpleXml);
 
