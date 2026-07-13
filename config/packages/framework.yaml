@@ -3,6 +3,11 @@ framework:
     http_method_override: false
     php_errors:
         log: true
+    http_client:
+        default_options:
+            # Bound the cron fetch so a hanging NOAA upstream cannot block the job.
+            timeout: 10
+            max_duration: 30
 
 when@test:
     framework:

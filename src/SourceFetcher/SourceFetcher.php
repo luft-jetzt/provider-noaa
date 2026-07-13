@@ -23,7 +23,17 @@ class SourceFetcher implements SourceFetcherInterface
         $response = $this->httpClient->request('GET', self::DATA_URI);
         $xmlFile = $response->getContent();
 
-        $simpleXml = new \SimpleXMLElement($xmlFile);
+        if ('' === trim($xmlFile)) {
+            throw new \RuntimeException('NOAA feed returned an empty response.');
+        }
+
+        // Reject DOCTYPE declarations outright: combined with LIBXML_NONET this keeps
+        // parsing safe against XXE/entity-expansion regardless of future libxml defaults.
+        if (str_contains($xmlFile, '<!DOCTYPE')) {
+            throw new \RuntimeException('NOAA feed contains a DOCTYPE declaration; refusing to parse.');
+        }
+
+        $simpleXml = new \SimpleXMLElement($xmlFile, LIBXML_NONET);
 
         $resultList = $this->parseXmlFile($simpleXml);
 
