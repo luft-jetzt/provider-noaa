@@ -364,6 +364,48 @@ XML;
         yield 'iso datetime' => ['2024-01-15T12:00:00'];
     }
 
+    public function testFetchIgnoresNumbersWithoutPpmUnit(): void
+    {
+        $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <guid>2024-3-15</guid>
+      <description>Station 421.99, temperature 12.5 C, CO2 430.12 ppm</description>
+    </item>
+  </channel>
+</rss>
+XML;
+
+        $fetcher = $this->createFetcher($xml);
+        $value = $fetcher->fetch();
+
+        self::assertNotNull($value);
+        self::assertSame(430.12, $value->getValue());
+    }
+
+    public function testFetchAssignsUtcTimezoneToDateTime(): void
+    {
+        $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <guid>2024-7-4</guid>
+      <description>CO2: 419.80 ppm</description>
+    </item>
+  </channel>
+</rss>
+XML;
+
+        $fetcher = $this->createFetcher($xml);
+        $value = $fetcher->fetch();
+
+        self::assertNotNull($value);
+        self::assertSame('UTC', $value->getDateTime()->getTimezone()->getName());
+    }
+
     private function createFetcher(string $responseBody): SourceFetcher
     {
         $response = new MockResponse($responseBody);

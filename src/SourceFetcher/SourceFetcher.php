@@ -34,7 +34,12 @@ class SourceFetcher implements SourceFetcherInterface
         $lastValueDateTimeString = array_key_last($resultList);
         $lastCo2Value = $resultList[$lastValueDateTimeString];
 
-        return $this->createValue($lastCo2Value, new \DateTime($lastValueDateTimeString));
+        // The feed reports plain dates without a timezone; anchor them to UTC
+        // explicitly so the pushed timestamp does not depend on the server's
+        // default timezone.
+        $dateTime = new \DateTime($lastValueDateTimeString, new \DateTimeZone('UTC'));
+
+        return $this->createValue($lastCo2Value, $dateTime);
     }
 
     private function createValue(float $co2Value, \DateTime $dateTime): Value
@@ -48,7 +53,16 @@ class SourceFetcher implements SourceFetcherInterface
         return $value;
     }
 
-    /** @return array<string, float> */
+    /**
+     * Builds a map of `Y-m-d` GUID => CO2 value from the RSS items.
+     *
+     * Only weekly items with a full year-month-day GUID (e.g. `2026-6-21`) are
+     * considered. Monthly aggregate items, whose GUID has only two parts
+     * (e.g. `2026-5`), are intentionally skipped so that the pushed value is
+     * always the most recent weekly reading.
+     *
+     * @return array<string, float>
+     */
     private function parseXmlFile(\SimpleXMLElement $xmlRoot): array
     {
         $resultList = [];
@@ -79,8 +93,12 @@ class SourceFetcher implements SourceFetcherInterface
 
     private function fetchCo2ValueFromString(string $description): ?float
     {
-        if (preg_match('/\d{3,}\.\d{1,2}/', $description, $matches)) {
-            return (float) $matches[0];
+        // Anchor on the "ppm" unit and a word boundary so that unrelated numbers
+        // in the description are ignored and a value is never sliced out of a
+        // longer number (e.g. `430.85` out of `1430.85`). The first match is the
+        // current weekly reading in the live feed.
+        if (preg_match('/\b(\d{3,4}\.\d{1,2})\s*ppm/i', $description, $matches)) {
+            return (float) $matches[1];
         }
 
         return null;
