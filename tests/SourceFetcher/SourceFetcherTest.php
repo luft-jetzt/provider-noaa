@@ -289,6 +289,37 @@ XML;
         $fetcher->fetch();
     }
 
+    public function testFetchThrowsOnEmptyResponse(): void
+    {
+        $fetcher = $this->createFetcher('   ');
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('empty response');
+        $fetcher->fetch();
+    }
+
+    public function testFetchRejectsDoctypeDeclaration(): void
+    {
+        $xml = <<<'XML'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE rss [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>
+<rss version="2.0">
+  <channel>
+    <item>
+      <guid>2024-3-15</guid>
+      <description>CO2: &xxe; 421.37 ppm</description>
+    </item>
+  </channel>
+</rss>
+XML;
+
+        $fetcher = $this->createFetcher($xml);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('DOCTYPE');
+        $fetcher->fetch();
+    }
+
     public function testFetchIgnoresItemsWithEmptyGuid(): void
     {
         $xml = <<<'XML'
