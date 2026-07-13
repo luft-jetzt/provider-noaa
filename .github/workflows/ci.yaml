@@ -22,6 +22,9 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist
 
+      - name: Security audit
+        run: composer audit
+
       - name: PHPStan
         run: vendor/bin/phpstan analyse
 
